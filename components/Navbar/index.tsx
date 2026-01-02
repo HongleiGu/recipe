@@ -90,7 +90,7 @@ const Navbar: React.FC = () => {
               {profile && (
                 <div className="relative h-10 w-10 rounded-full overflow-hidden border border-gray-300">
                   <Image
-                    src={profile.avatar_url ?? FALLBACK_AVATAR}
+                    src={profile.avatar_url || FALLBACK_AVATAR}
                     alt={profile.username || 'User avatar'}
                     fill
                     sizes="40px"
