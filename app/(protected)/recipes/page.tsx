@@ -13,6 +13,7 @@ import type {
   Author,
 } from '@/types/recipe'
 import { FALLBACK_MEDIA } from '@/lib/utils'
+import Link from 'next/link'
 
 const CATEGORIES: { key: TagCategory; label: string }[] = [
   { key: 'ingredient', label: 'Ingredients' },
@@ -160,9 +161,24 @@ export default function RecipesFeed() {
   // ------------------------------
   return (
     <div className="container mx-auto px-4 pb-16">
-      <h2 className="my-12 text-center text-3xl font-bold">
-        Explore Recipes
-      </h2>
+      <div className="my-12 flex items-center justify-between">
+        {/* Spacer to keep title centered */}
+        <div className="w-24" />
+
+        <h2 className="text-3xl font-bold text-center flex-1">
+          Explore Recipes
+        </h2>
+
+        <div className="w-24 flex justify-end">
+          <Link
+            href="/recipes/upload"
+            className="rounded-xl bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-800"
+          >
+            + Upload
+          </Link>
+        </div>
+      </div>
+
 
       {/* ===== Search Panel ===== */}
       <div className="mb-10 space-y-6 rounded-2xl bg-white p-6 shadow-sm">
