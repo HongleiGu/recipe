@@ -25,13 +25,13 @@ export async function getRecipeBySlug(slug: string): Promise<RecipeFull | null> 
       author:profiles (
         id,
         username,
-        display_name,
         avatar_url
       )
     `)
     .eq('slug', slug)
     .single()
 
+  console.log(data)
   if (error || !data) return null
 
   return {

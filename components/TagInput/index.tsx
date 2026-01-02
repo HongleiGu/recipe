@@ -11,27 +11,20 @@ type Props = {
   onChange: (tags: string[]) => void
 }
 
-export default function TagInput({
-  category,
-  label,
-  value,
-  onChange,
-}: Props) {
+export default function TagInput({ category, label, value, onChange }: Props) {
   const [input, setInput] = useState('')
   const [suggestions, setSuggestions] = useState<string[]>([])
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
 
-  const handleChange = (text: string) => {
+  const handleInputChange = (text: string) => {
     setInput(text)
 
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current)
-    }
-
     if (!text.trim()) {
-      setSuggestions([])
+      setSuggestions([]) // ✅ move here instead of inside useEffect
       return
     }
+
+    if (debounceRef.current) clearTimeout(debounceRef.current)
 
     debounceRef.current = setTimeout(async () => {
       const { data, error } = await supabase
@@ -43,12 +36,10 @@ export default function TagInput({
 
       if (!error && data) {
         setSuggestions(
-          data
-            .map((t) => t.name)
-            .filter((name) => !value.includes(name))
+          data.map((t) => t.name).filter((name) => !value.includes(name))
         )
       }
-    }, 300)
+    }, 250)
   }
 
   const addTag = (name: string) => {
@@ -64,64 +55,43 @@ export default function TagInput({
   }
 
   return (
-    <div className="relative space-y-2">
-      {/* Label */}
+    <div className="space-y-2">
       <label className="block font-medium">{label}</label>
 
-      {/* Input */}
       <input
         value={input}
-        onChange={(e) => handleChange(e.target.value)}
+        onChange={(e) => handleInputChange(e.target.value)}
         placeholder={`Add ${label.toLowerCase()}`}
         className="w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring"
       />
 
-      {/* Drawer Suggestions */}
-      {(suggestions.length > 0 || input != '') && (
-        <div
-          className="
-            absolute left-0 right-0 z-20 mt-2
-            max-h-56 overflow-y-auto
-            rounded-xl border bg-white shadow-lg
-          "
-        >
-          <div className="px-4 py-2 text-xs font-semibold text-gray-500">
-            Suggestions
-          </div>
-
-          <div className="divide-y">
-            {suggestions.map((name) => (
+      {/* Suggestions */}
+      {input && (
+        <div className="rounded-lg border bg-white shadow-sm">
+          {suggestions.length > 0 ? (
+            suggestions.map((name) => (
               <button
                 key={name}
                 type="button"
                 onClick={() => addTag(name)}
-                className="
-                  w-full px-4 py-2 text-left
-                  hover:bg-gray-50
-                "
+                className="w-full px-3 py-2 text-left hover:bg-gray-50"
               >
                 {name}
               </button>
-            ))}
-          </div>
+            ))
+          ) : (
+            <p className="px-3 py-2 text-sm text-gray-400">No suggestions</p>
+          )}
 
-          {/* Create new tag */}
-          {input &&
-            !suggestions.includes(input) &&
-            !value.includes(input) && (
-              <div className="border-t">
-                <button
-                  type="button"
-                  onClick={() => addTag(input)}
-                  className="
-                    w-full px-4 py-2 text-left text-sm
-                    text-blue-600 hover:bg-blue-50
-                  "
-                >
-                  + Create new tag “{input}”
-                </button>
-              </div>
-            )}
+          {input && !value.includes(input) && !suggestions.includes(input) && (
+            <button
+              type="button"
+              onClick={() => addTag(input)}
+              className="w-full px-3 py-2 text-left text-blue-600 hover:bg-blue-50 text-sm border-t"
+            >
+              + Create new tag “{input}”
+            </button>
+          )}
         </div>
       )}
 
@@ -131,11 +101,7 @@ export default function TagInput({
           {value.map((tag) => (
             <span
               key={tag}
-              className="
-                flex items-center gap-1
-                rounded-full bg-gray-200
-                px-3 py-1 text-sm
-              "
+              className="flex items-center gap-1 rounded-full bg-gray-200 px-3 py-1 text-sm"
             >
               {tag}
               <button

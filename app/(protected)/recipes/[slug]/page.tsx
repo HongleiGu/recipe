@@ -30,6 +30,7 @@ function formatContent(text: string): JSX.Element[] {
 
 export default async function RecipePage({ params }: PageProps) {
   const p = await params
+  console.log(p)
   const recipe = await getRecipeBySlug(p.slug)
 
   if (!recipe) {
@@ -47,7 +48,7 @@ export default async function RecipePage({ params }: PageProps) {
             </h1>
 
             {/* Client-side actions */}
-            <RecipeActions recipeId={recipe.id} slug={recipe.slug} />
+            <RecipeActions recipe={recipe} />
           </div>
 
           {/* Tags */}
@@ -69,7 +70,7 @@ export default async function RecipePage({ params }: PageProps) {
         <div className="flex items-center gap-3">
           <Image
             src={recipe.author.avatar_url || '/avatar-placeholder.png'}
-            alt={recipe.author.display_name || 'User'}
+            alt={recipe.author.username || 'User'}
             width={40}
             height={40}
             className="rounded-full"
@@ -77,7 +78,7 @@ export default async function RecipePage({ params }: PageProps) {
 
           <div className="text-sm">
             <p className="font-medium">
-              {recipe.author.display_name || recipe.author.username}
+              {recipe.author.username}
             </p>
             <p className="text-gray-500">Recipe author</p>
           </div>

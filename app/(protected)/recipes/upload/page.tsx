@@ -1,67 +1,80 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabaseClient';
-import TagInput from '@/components/TagInput';
-import { upsertAndLinkTags } from '@/lib/recipeActions';
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabaseClient'
+import TagInput from '@/components/TagInput'
+import { upsertAndLinkTags } from '@/lib/recipeActions'
+import type { Tag } from '@/types/recipe'
 
 export default function UploadRecipePage() {
-  const router = useRouter();
+  const router = useRouter()
 
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [files, setFiles] = useState<File[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [title, setTitle] = useState('')
+  const [content, setContent] = useState('')
+  const [files, setFiles] = useState<File[]>([])
+  const [loading, setLoading] = useState(false)
 
   const [ingredients, setIngredients] = useState<string[]>([])
   const [seasonings, setSeasonings] = useState<string[]>([])
   const [techniques, setTechniques] = useState<string[]>([])
 
+  const [userId, setUserId] = useState<string | null>(null)
+
+  // Get current user
+  useEffect(() => {
+    const getUser = async () => {
+      const { data } = await supabase.auth.getUser()
+      setUserId(data.user?.id ?? null)
+    }
+    getUser()
+  }, [])
 
   const slugify = (text: string) =>
     text
       .toLowerCase()
       .trim()
       .replace(/[^\w\s-]/g, '')
-      .replace(/\s+/g, '-');
+      .replace(/\s+/g, '-')
 
   const handleSubmit = async () => {
-    if (!title || !content) return alert('Title and content required');
+    if (!title || !content) return alert('Title and content required')
+    if (!userId) return alert('You must be logged in to upload')
 
-    setLoading(true);
+    setLoading(true)
 
-    const slug = slugify(title);
+    const slug = slugify(title)
 
-    // 1️⃣ Insert recipe
+    // 1️⃣ Insert recipe with author
     const { data: recipe, error: recipeError } = await supabase
       .from('recipes')
       .insert({
         title,
         slug,
         content,
+        author_id: userId,
       })
       .select()
-      .single();
+      .single()
 
     if (recipeError || !recipe) {
-      setLoading(false);
-      return alert('Failed to create recipe');
+      setLoading(false)
+      return alert('Failed to create recipe')
     }
 
-    // 2️⃣ Upload media files
+    // 2️⃣ Upload media
     for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const ext = file.name.split('.').pop();
-      const filePath = `recipes/${recipe.id}/${i}.${ext}`;
+      const file = files[i]
+      const ext = file.name.split('.').pop()
+      const filePath = `recipes/${recipe.id}/${i}.${ext}`
 
       const { error: uploadError } = await supabase.storage
         .from('recipe-media')
-        .upload(filePath, file);
+        .upload(filePath, file)
 
       if (uploadError) {
-        console.error(uploadError);
-        continue;
+        console.error(uploadError)
+        continue
       }
 
       await supabase.from('recipe_media').insert({
@@ -69,10 +82,11 @@ export default function UploadRecipePage() {
         file_path: filePath,
         position: i,
         media_type: file.type.startsWith('video') ? 'video' : 'image',
-      });
+      })
     }
 
-    const allTags = [
+    // 3️⃣ Upsert tags
+    const allTags: Tag[] = [
       ...ingredients.map((name) => ({ name, category: 'ingredient' as const })),
       ...seasonings.map((name) => ({ name, category: 'seasoning' as const })),
       ...techniques.map((name) => ({ name, category: 'technique' as const })),
@@ -80,10 +94,9 @@ export default function UploadRecipePage() {
 
     await upsertAndLinkTags(recipe.id, allTags)
 
-
-    setLoading(false);
-    router.push(`/recipes/${slug}`);
-  };
+    setLoading(false)
+    router.push(`/recipes/${slug}`)
+  }
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-16">
@@ -111,30 +124,29 @@ export default function UploadRecipePage() {
             className="w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring"
             placeholder={`Ingredients:\n\nSteps:\n\nTips:`}
           />
+        </div>
+
+        {/* Tags */}
+        <div className="space-y-4">
           <TagInput
             category="ingredient"
             label="Ingredients"
             value={ingredients}
             onChange={setIngredients}
           />
-
           <TagInput
             category="seasoning"
-            label="Seasoning"
+            label="Seasonings"
             value={seasonings}
             onChange={setSeasonings}
           />
-
           <TagInput
             category="technique"
-            label="Technique"
+            label="Techniques"
             value={techniques}
             onChange={setTechniques}
           />
-
         </div>
-
-
 
         {/* Media */}
         <div>
@@ -160,5 +172,5 @@ export default function UploadRecipePage() {
         </button>
       </div>
     </div>
-  );
+  )
 }

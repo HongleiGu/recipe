@@ -84,7 +84,6 @@ const Navbar: React.FC = () => {
         <div className="flex items-center gap-4">
           {user ? (
             <>
-
               {/* Avatar using Next.js Image */}
               {profile?.avatar_url && (
                 <div className="relative h-10 w-10 rounded-full overflow-hidden border border-gray-300">
