@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import type { User } from '@supabase/supabase-js';
+import { FALLBACK_AVATAR } from '@/lib/utils';
 
 const AuthForm = () => {
   const router = useRouter();
@@ -38,7 +39,7 @@ const AuthForm = () => {
     const { error } = await supabase.from('profiles').upsert({
       id: user.id,
       username: username?.trim() || user.email?.split('@')[0],
-      avatar_url: avatarUrl || null,
+      avatar_url: avatarUrl || FALLBACK_AVATAR,
       last_login: new Date().toISOString(),
     }, { onConflict: 'id' });
 

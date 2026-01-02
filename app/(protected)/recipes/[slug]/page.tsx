@@ -5,7 +5,7 @@ import RecipeActions from '@/components/RecipeActions'
 import { JSX } from 'react'
 // import { supabase } from '@/lib/supabaseClient'
 import MediaCarousel from '@/components/MediaCarousel'
-import { FALLBACK_IMAGE } from '@/lib/utils'
+import { FALLBACK_AVATAR, FALLBACK_IMAGE } from '@/lib/utils'
 
 type PageProps = {
   params: {
@@ -69,7 +69,7 @@ export default async function RecipePage({ params }: PageProps) {
         {/*===== Author =====*/}
         <div className="flex items-center gap-3">
           <Image
-            src={recipe.author.avatar_url || '/avatar-placeholder.png'}
+            src={recipe.author.avatar_url || FALLBACK_AVATAR}
             alt={recipe.author.username || 'User'}
             width={40}
             height={40}

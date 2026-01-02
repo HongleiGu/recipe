@@ -1,2 +1,5 @@
 export const FALLBACK_IMAGE =
   process.env.NEXT_PUBLIC_FALLBACK_RECIPE_IMAGE!
+
+export const FALLBACK_AVATAR =
+  process.env.NEXT_PUBLIC_FALLBACK_AVATAR_IMAGE!

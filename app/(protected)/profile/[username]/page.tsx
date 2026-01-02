@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import { UserProfile } from '@/types/recipe'
+import { FALLBACK_AVATAR } from '@/lib/utils'
 
 type PageProps = {
   params: {
@@ -41,7 +42,7 @@ export default async function ProfilePage({ params }: PageProps) {
       {/* ================= Header ================= */}
       <section className="flex items-center gap-6">
         <Image
-          src={profile.avatar_url || '/avatar-placeholder.png'}
+          src={profile.avatar_url || FALLBACK_AVATAR}
           alt={profile.username}
           width={96}
           height={96}

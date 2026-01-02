@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
+import { FALLBACK_AVATAR } from '@/lib/utils';
 
 type Profile = {
   id: string;
@@ -33,6 +34,7 @@ const Navbar: React.FC = () => {
           .eq('id', user.id)
           .single();
         setProfile(profileData ?? null);
+        console.log(profileData)
       }
     };
 
@@ -85,10 +87,10 @@ const Navbar: React.FC = () => {
           {user ? (
             <>
               {/* Avatar using Next.js Image */}
-              {profile?.avatar_url && (
+              {profile && (
                 <div className="relative h-10 w-10 rounded-full overflow-hidden border border-gray-300">
                   <Image
-                    src={profile.avatar_url}
+                    src={profile.avatar_url ?? FALLBACK_AVATAR}
                     alt={profile.username || 'User avatar'}
                     fill
                     sizes="40px"
