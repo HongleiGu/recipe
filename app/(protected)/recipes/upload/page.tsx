@@ -51,7 +51,7 @@ export default function UploadRecipePage() {
       .insert({
         title,
         slug,
-        content,
+        content: content.replace(/\n/g, '\\n'),
         author_id: userId,
       })
       .select()

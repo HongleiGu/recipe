@@ -10,6 +10,7 @@ export type RecipeMedia = {
   file_path: string
   position: number
   media_type?: MediaType
+  default? : boolean
 }
 
 /**

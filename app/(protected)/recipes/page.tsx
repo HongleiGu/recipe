@@ -12,6 +12,7 @@ import type {
   RecipeMedia,
   Author,
 } from '@/types/recipe'
+import { FALLBACK_MEDIA } from '@/lib/utils'
 
 const CATEGORIES: { key: TagCategory; label: string }[] = [
   { key: 'ingredient', label: 'Ingredients' },
@@ -66,7 +67,7 @@ export default function RecipesFeed() {
         title: r.title,
         slug: r.slug,
         content: r.content,
-        recipe_media: r.recipe_media as RecipeMedia[],
+        recipe_media: r.recipe_media.length == 0 ? [FALLBACK_MEDIA] : r.recipe_media as RecipeMedia[],
         tags: r.recipe_tags?.flatMap((rt) => rt.tags ?? []) ?? [],
         author: Array.isArray(r.author) ? r.author[0] : r.author as Author,
       }))
@@ -145,6 +146,9 @@ export default function RecipesFeed() {
   const getCoverUrl = (media: RecipeMedia[]) => {
     const cover = media?.[0]
     if (!cover) return null
+    if (cover.default) {
+      return cover.file_path
+    }
 
     return supabase.storage
       .from('recipe-media')
