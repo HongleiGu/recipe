@@ -21,29 +21,34 @@ const Navbar: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
 
-  // Fetch current user and profile
+  // Fetch profile for a given user
+  const fetchProfile = async (userId: string) => {
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('id, username, avatar_url')
+      .eq('id', userId)
+      .single();
+    setProfile(profileData ?? null);
+  };
+
   useEffect(() => {
-    const fetchUserAndProfile = async () => {
+    // Fetch current user on mount
+    const init = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user ?? null);
-
-      if (user) {
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('id, username, avatar_url')
-          .eq('id', user.id)
-          .single();
-        setProfile(profileData ?? null);
-        console.log(profileData)
-      }
+      if (user) fetchProfile(user.id);
     };
+    init();
 
-    fetchUserAndProfile();
-
+    // Subscribe to auth state changes
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
-      if (!currentUser) setProfile(null);
+      if (currentUser) {
+        fetchProfile(currentUser.id);
+      } else {
+        setProfile(null);
+      }
     });
 
     return () => listener.subscription.unsubscribe();
